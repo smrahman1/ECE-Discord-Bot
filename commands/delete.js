@@ -3,7 +3,6 @@ const {
   TextInputAssertions,
 } = require("@discordjs/builders");
 
-const getArray = require("../getChoices");
 const deadlineModel = require("../models/deadlineSchema");
 
 let tempArray = [
@@ -14,8 +13,8 @@ let tempArray = [
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName("add")
-    .setDescription("Adds deadline to database")
+    .setName("delete")
+    .setDescription("Deletes a deadline from the database")
     .addStringOption((option) =>
       option
         .setName("coursecode")
@@ -25,39 +24,29 @@ module.exports = {
     )
     .addStringOption((option) =>
       option
-        .setName("date")
-        .setDescription("Date formatted as: Month/Day")
-        .setRequired(true)
-    )
-    .addStringOption((option) =>
-      option
         .setName("title")
         .setDescription("Title for deadline")
         .setRequired(true)
-    )
-    .addStringOption((option) =>
-      option
-        .setName("desc")
-        .setDescription("Description for deadline")
-        .setRequired(false)
     ),
   async execute(interaction) {
     const courseCode = interaction.options.getString("coursecode");
-    const date = interaction.options.getString("date");
     const title = interaction.options.getString("title");
-    const desc = interaction.options.getString("desc");
-    const addCourse = await deadlineModel.findOne({ courseCode });
-    if (addCourse) {
-      addCourse.deadlineArray.push({
-        title,
-        date,
-        desc,
-        status: 1,
-      });
-      await addCourse.save();
+    const deleteCourse = await deadlineModel.findOne({ courseCode });
+
+    if (deleteCourse) {
+      deleteCourse.deadlineArray = deleteCourse.deadlineArray.map(
+        (deadline) => {
+          if (deadline.title === title) {
+            deadline.status = 0;
+          }
+          return deadline;
+        }
+      );
     }
+    deleteCourse.markModified("deadlineArray");
+    await deleteCourse.save();
     await interaction.reply({
-      content: `Deadline has been added!`,
+      content: `Deadline has been deleted!`,
       // ephemeral: true,
     });
   },

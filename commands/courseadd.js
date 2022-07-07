@@ -19,10 +19,8 @@ module.exports = {
     const coursecode = interaction.options.getString("coursecode");
     const course = new deadlineModel({
       courseCode: coursecode,
-      deadlineCount: 0,
       deadlineArray: [],
     });
-    course.deadlineArray.push({ name: "hola", test: "test" });
     await course.save();
 
     await interaction.reply({
