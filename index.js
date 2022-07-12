@@ -73,3 +73,9 @@ mongoose
   });
 
 client.login(token);
+
+const test = () => {
+  console.log("test");
+};
+
+module.export = test;
