@@ -2,6 +2,7 @@ require("dotenv").config();
 
 const token = process.env.DISCORD_TOKEN;
 
+const deadlineModel = require("./models/deadlineSchema");
 const mongoose = require("mongoose");
 
 // Discord Setup and Setting up link to command files
@@ -30,20 +31,35 @@ client.once("ready", (c) => {
 });
 
 client.on("interactionCreate", async (interaction) => {
-  if (!interaction.isCommand()) return;
+  if (interaction.isCommand()) {
+    const command = client.commands.get(interaction.commandName);
 
-  const command = client.commands.get(interaction.commandName);
+    if (!command) return;
 
-  if (!command) return;
-
-  try {
-    await command.execute(interaction);
-  } catch (error) {
-    console.error(error);
-    await interaction.reply({
-      content: "There was an error while executing this command!",
-      ephemeral: true,
-    });
+    try {
+      await command.execute(interaction);
+    } catch (error) {
+      console.error(error);
+      await interaction.reply({
+        content: "There was an error while executing this command!",
+        ephemeral: true,
+      });
+    }
+  }
+  if (interaction.isAutocomplete()) {
+    if (interaction.commandName === "add") {
+      const focusedValue = interaction.options.getFocused(true);
+      if (focusedValue.name === "coursecode") {
+        const choices = await deadlineModel.find({}, { courseCode: 1, _id: 0 });
+        const filtered = choices.filter((choice) => {
+          return choice.courseCode.startsWith(focusedValue.value);
+        });
+        const filteredOptions = filtered.map((filter) => filter.courseCode);
+        await interaction.respond(
+          filteredOptions.map((choice) => ({ name: choice, value: choice }))
+        );
+      }
+    }
   }
 });
 
