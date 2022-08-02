@@ -141,7 +141,7 @@ module.exports = {
         .add(5 - daylightSavings, "hours")
         .format("MMMM D, h:mm A");
       if (delay > 0) {
-        setTimeout(async () => {
+        const timeout = setTimeout(async () => {
           const channel = client.channels.cache.find(
             (channel) => channel.name === "general"
           );
@@ -154,6 +154,7 @@ module.exports = {
               formattedDate
           );
         }, delay);
+        global.timeoutArray.push(timeout);
       }
     }
     await interaction.reply({

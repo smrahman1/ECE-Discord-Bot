@@ -1,5 +1,6 @@
 require("dotenv").config();
 const moment = require("moment");
+global.timeoutArray = [];
 
 const token = process.env.DISCORD_TOKEN;
 
@@ -97,7 +98,7 @@ const setTimeouts = async () => {
             "\nDEADLINE NAME: " +
             deadline.title
         );
-        setTimeout(async () => {
+        const timeoutId = setTimeout(async () => {
           const channel = client.channels.cache.find(
             (channel) => channel.name === "general"
           );
@@ -110,10 +111,20 @@ const setTimeouts = async () => {
               formattedDate
           );
         }, delay);
+        global.timeoutArray.push(timeoutId);
       }
     });
   });
 };
+
+// Reset all timeouts every 5 days to prevent timeout integer overflow
+setInterval(() => {
+  global.timeoutArray.forEach((timeout) => {
+    clearTimeout(timeout);
+  });
+  global.timeoutArray = [];
+  setTimeouts();
+}, 432000000);
 
 setTimeouts();
 client.login(token);
