@@ -25,7 +25,7 @@ module.exports = {
 
     await interaction.reply({
       content: `Course has been added!`,
-      // ephemeral: true,
+      ephemeral: true,
     });
   },
 };

@@ -3,8 +3,8 @@ const {
   TextInputAssertions,
 } = require("@discordjs/builders");
 
-const getArray = require("../getChoices");
 const deadlineModel = require("../models/deadlineSchema");
+const moment = require("moment");
 
 const monthArray = [
   { name: "January", value: "January" },
@@ -132,21 +132,33 @@ module.exports = {
 
       const client = interaction.client;
       const currDate = new Date();
-      currDate.setHours(currDate.getHours() - 4);
+      let daylightSavings = moment(currDate).isDST();
+      currDate.setHours(currDate.getHours() - 5 + daylightSavings);
       const delay = deadlineDate.getTime() - currDate - 24 * 60 * 60 * 1000;
-      console.log(delay);
+
+      let formattedDate = new Date(deadlineDate);
+      formattedDate = moment(formattedDate)
+        .add(5 - daylightSavings, "hours")
+        .format("MMMM D, h:mm A");
       if (delay > 0) {
         setTimeout(async () => {
           const channel = client.channels.cache.find(
             (channel) => channel.name === "general"
           );
-          channel.send("DEADLINE");
+          channel.send(
+            "DEADLINE 1 DAY LEFT FOR COURSE " +
+              courseCode +
+              " ASSIGNMENT: " +
+              title +
+              " at " +
+              formattedDate
+          );
         }, delay);
       }
     }
     await interaction.reply({
       content: `Deadline has been added!`,
-      // ephemeral: true,
+      ephemeral: true,
     });
   },
 };

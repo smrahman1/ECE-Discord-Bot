@@ -1,4 +1,5 @@
 require("dotenv").config();
+const moment = require("moment");
 
 const token = process.env.DISCORD_TOKEN;
 
@@ -72,10 +73,47 @@ mongoose
     console.log(e);
   });
 
-client.login(token);
+const setTimeouts = async () => {
+  const courses = await deadlineModel.find({});
+  courses.forEach((course) => {
+    course.deadlineArray.forEach((deadline) => {
+      const ONE_DAY = 1000 * 60 * 60 * 24;
+      const now = new Date();
+      const deadlineDate = new Date(deadline.date);
 
-const test = () => {
-  console.log("test");
+      const date = moment(deadlineDate);
+      now.setHours(now.getHours() - 5 + moment(now).isDST());
+      const delay = date.valueOf() - now - ONE_DAY;
+
+      let formattedDate = new Date(deadlineDate);
+      formattedDate = moment(formattedDate)
+        .add(5 - moment(now).isDST(), "hours")
+        .format("MMMM D, h:mm A");
+
+      if (delay > 0 && deadlineDate.getTime() - now.getTime() <= ONE_DAY * 21) {
+        console.log(
+          "ADDING TIMEOUT TO " +
+            course.courseCode +
+            "\nDEADLINE NAME: " +
+            deadline.title
+        );
+        setTimeout(async () => {
+          const channel = client.channels.cache.find(
+            (channel) => channel.name === "general"
+          );
+          channel.send(
+            "DEADLINE 1 DAY LEFT FOR COURSE " +
+              course.courseCode +
+              " ASSIGNMENT: " +
+              deadline.title +
+              " at " +
+              formattedDate
+          );
+        }, delay);
+      }
+    });
+  });
 };
 
-module.export = test;
+setTimeouts();
+client.login(token);

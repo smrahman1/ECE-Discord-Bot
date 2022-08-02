@@ -3,6 +3,7 @@ const {
   TextInputAssertions,
 } = require("@discordjs/builders");
 const deadlineModel = require("../models/deadlineSchema");
+const displayEmbed = require("../embed/displayDeadlines");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -20,26 +21,17 @@ module.exports = {
     if (!courses) {
       courses = await DeadlineModel.find();
     }
+    const currDate = new Date();
     courses.forEach((course) => {
-      course.deadlineArray = course.deadlineArray.filter(
-        (assign) => assign.status === 1
-      );
+      course.deadlineArray = course.deadlineArray.filter((assignment) => {
+        const assignmentDate = new Date(assignment.date);
+        return assignment.status === 1 && assignmentDate >= currDate;
+      });
     });
 
-    courses.forEach((course) => {
-      if (course.deadlineArray.length !== 0) {
-        response += `***${course.courseCode}***\n`;
-        course.deadlineArray.forEach((assignment) => {
-          response += `${assignment.title ? assignment.title : ""} ${
-            assignment.date ? assignment.date : ""
-          } ${assignment.desc ? assignment.desc : ""}\n`;
-        });
-      }
-    });
-
+    const embed = displayEmbed(courses);
     await interaction.reply({
-      content: response,
-      // ephemeral: true,
+      embeds: [embed],
     });
   },
 };

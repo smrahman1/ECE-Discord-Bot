@@ -47,7 +47,7 @@ module.exports = {
     await deleteCourse.save();
     await interaction.reply({
       content: `Deadline has been deleted!`,
-      // ephemeral: true,
+      ephemeral: true,
     });
   },
 };
