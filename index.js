@@ -1,6 +1,5 @@
 require("dotenv").config();
-const moment = require("moment-timezone");
-moment.tz.setDefault("America/Toronto");
+const moment = require("moment");
 global.timeoutArray = [];
 
 const token = process.env.DISCORD_TOKEN;
@@ -80,10 +79,10 @@ const setTimeouts = async () => {
   courses.forEach((course) => {
     course.deadlineArray.forEach((deadline) => {
       const ONE_DAY = 1000 * 60 * 60 * 24;
-      const now = moment();
-      const deadlineDate = moment(deadline.date);
+      const now = new Date();
+      const deadlineDate = new Date(deadline.date);
 
-      const date = moment(deadlineDate);
+      const date = new Date(deadlineDate);
       now.setHours(now.getHours() - 5 + moment(now).isDST());
       const delay = date.valueOf() - now - ONE_DAY;
 

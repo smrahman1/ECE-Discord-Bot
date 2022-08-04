@@ -4,8 +4,8 @@ const {
 } = require("@discordjs/builders");
 
 const deadlineModel = require("../models/deadlineSchema");
-const moment = require("moment-timezone");
-moment.tz.setDefault("America/Toronto");
+const moment = require("moment");
+
 const monthArray = [
   { name: "January", value: "January" },
   { name: "February", value: "February" },
