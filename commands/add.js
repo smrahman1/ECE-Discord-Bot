@@ -5,7 +5,7 @@ const {
 
 const deadlineModel = require("../models/deadlineSchema");
 const moment = require("moment");
-
+moment.tz.setDefault("America/Toronto");
 const monthArray = [
   { name: "January", value: "January" },
   { name: "February", value: "February" },
@@ -118,9 +118,10 @@ module.exports = {
       hours,
       time.split(":")[1]
     );
+    let daylightSavings = moment(currDate).isDST();
 
-    deadlineDate.setHours(deadlineDate.getHours() - 4);
-    console.log(deadlineDate);
+    deadlineDate.setHours(deadlineDate.getHours() - 6 + daylightSavings);
+
     if (addCourse) {
       addCourse.deadlineArray.push({
         title,
@@ -132,13 +133,12 @@ module.exports = {
 
       const client = interaction.client;
       const currDate = new Date();
-      let daylightSavings = moment(currDate).isDST();
-      currDate.setHours(currDate.getHours() - 5 + daylightSavings);
+      currDate.setHours(currDate.getHours() - 6 + daylightSavings);
       const delay = deadlineDate.getTime() - currDate - 24 * 60 * 60 * 1000;
 
       let formattedDate = new Date(deadlineDate);
       formattedDate = moment(formattedDate)
-        .add(5 - daylightSavings, "hours")
+        .add(4 - daylightSavings, "hours")
         .format("MMMM D, h:mm A");
       if (delay > 0) {
         const timeout = setTimeout(async () => {
